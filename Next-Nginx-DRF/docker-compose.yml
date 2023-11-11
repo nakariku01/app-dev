@@ -1,0 +1,86 @@
+version: '3.8'
+
+services:
+  # PostgreSQLデータベースの定義
+  db:
+    # postgresイメージ使用
+    image: postgres
+    # ホスト上の./data/dbディレクトリとコンテナ上の/var...ディレクトリとの間でデータ永続化のためのvolume
+    volumes:
+      - ./data/db:/var/lib/postgresql/data
+    container_name: db-dev
+    # データベース上の環境変数指定
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    networks:
+      - backend_network
+  # Webアプリ実行のためのサービス定義
+  api:
+    env_file:
+      - ./backend/api/.env
+    # カレントディレクトリのDockerfileからDockerイメージをビルド
+    build: 
+      context: ./backend/api
+      #Dockerfile名指定
+      dockerfile: Dockerfile.dev
+    container_name: api-dev
+    # コンテナ起動時にdjango起動
+    #command: python /app/backend/manage.py runserver 0.0.0.0:8000
+    command: gunicorn --bind 0.0.0.0:8000 config.wsgi:application
+    stdin_open: true
+    tty: true
+    # カレントディレクトリ(.)とコンテナ上の/codeディレクトリ間でコード共有
+    volumes:
+      - ./backend/api:/app/backend/api
+      - static_volume:/app/backend/api/staticfiles
+    # カレントディレクトリのポート8000番とコンテナ内のポート8000番をマッピング
+    # Webアプリの環境変数指定
+    environment:
+      - POSTGRES_NAME=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - CHOKIDAR_USEPOLLING=true
+      - DJANGO_SETTINGS_MODULE=config.settings
+    # 依存サービス指定。dbが先に立ち上がるようにする
+    depends_on:
+      - db
+    networks:
+      - backend_network
+
+  api-server:
+    container_name: api-server-dev
+    build: 
+      context: ./backend/nginx
+      dockerfile: Dockerfile.dev
+    volumes:
+      - static_volume:/app/backend/staticfiles
+    ports:
+      - "8080:80"
+    depends_on:
+      - api
+    networks:
+      - backend_network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: frontenv-dev
+    volumes:
+      - ./frontend:/app/frontend
+    ports:
+      - "3000:3000"
+    tty: true
+    command: sh -c "cd frontend && npm run dev"
+    networks:
+      - backend_network
+
+
+networks:
+  backend_network:
+    driver: bridge
+
+volumes:
+  static_volume:

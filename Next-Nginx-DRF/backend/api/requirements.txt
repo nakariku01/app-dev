@@ -1,0 +1,15 @@
+asgiref
+Django>=3.0,<4.0
+psycopg2>=2.8
+djangorestframework
+django-cors-headers
+django-filter
+django-guardian
+coreapi
+gunicorn
+Markdown
+Pygments
+python-dotenv
+pytz
+sqlparse
+Pillow

@@ -1,0 +1,18 @@
+# syntax=docker/dockerfile:1
+# python3のイメージ取得
+FROM python:3.7
+# バイトコードを生成しないようにする。ディスクスペース節約。
+ENV PYTHONDONTWRITTENBYCODE = 1
+# pythonの出力をリアルタイムで表示
+ENV PYTHONUNBFFERED = 1
+# コンテナ内での作業ディレクトリ作成
+WORKDIR /app/backend/api
+# カレントディレクトリのrequirement.txtをコンテナ内のcodeにコピー
+COPY /requirements.txt /app/backend/api/
+# コンテナ内のrequirement.txtから必要パッケージインストール
+RUN python3 -m pip install --upgrade pip setuptools 
+RUN pip install -r requirements.txt 
+# カレントディレクトリにあるすべてのファイルをコンテナ内にコピー
+COPY . /app/backend/api
+
+EXPOSE 8000

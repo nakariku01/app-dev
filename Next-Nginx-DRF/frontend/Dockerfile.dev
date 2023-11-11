@@ -1,0 +1,11 @@
+# syntax=docker/dockerfile:1.4
+
+FROM node:21-alpine3.17
+
+WORKDIR /app/frontend
+
+RUN npm install -g npm@latest 
+
+COPY . ./app/frontend/
+
+EXPOSE 3000
