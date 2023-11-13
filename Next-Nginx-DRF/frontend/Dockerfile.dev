@@ -6,6 +6,6 @@ WORKDIR /app/frontend
 
 RUN npm install -g npm@latest 
 
-COPY . ./app/frontend/
+COPY . .
 
 EXPOSE 3000

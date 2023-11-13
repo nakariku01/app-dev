@@ -8,11 +8,11 @@ ENV PYTHONUNBFFERED = 1
 # コンテナ内での作業ディレクトリ作成
 WORKDIR /app/backend/api
 # カレントディレクトリのrequirement.txtをコンテナ内のcodeにコピー
-COPY /requirements.txt /app/backend/api/
+COPY /requirements.txt .
 # コンテナ内のrequirement.txtから必要パッケージインストール
 RUN python3 -m pip install --upgrade pip setuptools 
 RUN pip install -r requirements.txt 
 # カレントディレクトリにあるすべてのファイルをコンテナ内にコピー
-COPY . /app/backend/api
+COPY . .
 
 EXPOSE 8000
